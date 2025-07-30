@@ -53,12 +53,12 @@ def generate_token(password):
 
 def extract_response_data(response):
     if response.status_code != 200:
-        print("Errore nella richiesta:", response.status_code)
+        print("Request failed:", response.status_code)
         return None
 
     data = response.json()
     if data.get("subsonic-response", {}).get("error", None):
-        print("Errore nella risposta del server:", data["subsonic-response"]["error"]["message"])
+        print("Error in server response:", data["subsonic-response"]["error"]["message"])
         return None
 
     return data.get("subsonic-response", {})
