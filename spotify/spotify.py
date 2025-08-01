@@ -1,6 +1,3 @@
-import random
-import string
-import requests
 import os
 from dotenv import load_dotenv
 import spotipy
