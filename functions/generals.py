@@ -7,8 +7,8 @@ def ping_server() -> int:
     response = requests.get(url, params=params)
     data = extract_response_data(response)
     if data:
-        print("Server is reachable.")
+        print("Navidrome server is reachable.")
         return 0
     else:
-        print("Failed to reach the server.")
+        print("❌ Failed to reach the Navidrome server.")
         return -1

@@ -46,22 +46,23 @@ class Spotify:
     def get_current_user(self):
         print("Connected as: " + self.__sp.current_user().get('display_name', 'Error!'))
 
-    def get_user_playlists(self, user_id=None):
+    def get_user_playlists(self, user_id=None, limit=50, silent=True):
         if user_id is None:
             user_id = self.__sp.current_user()['id']
         playlists = self.__sp.user_playlists(
             user=user_id,
             offset=0,
-            limit=1
+            limit=limit
         )
-        for playlist in playlists.get('items', []):
-            print(f"Playlist: {playlist.get('name')} (ID: {playlist.get('id')}) - Number of songs: {playlist.get('tracks', {}).get('total', 0)} Owner: {playlist.get('owner', {}).get('display_name', 'Unknown')} - Public: {playlist.get('public', False)}")
-        return playlists
-    
-    def get_playlist_tracks(self, playlist_id):
+        if not silent:
+            for playlist in playlists.get('items', []):
+                print(f"Playlist: {playlist.get('name')} (ID: {playlist.get('id')}) - Number of songs: {playlist.get('tracks', {}).get('total', 0)} Owner: {playlist.get('owner', {}).get('display_name', 'Unknown')} - Public: {playlist.get('public', False)}")
+        return playlists.get('items', [])
+
+    def get_playlist_tracks(self, playlist_id, silent=True):
         tracks = self.__sp.playlist_tracks(playlist_id)
         for item in tracks.get('items', []):
             track = item.get('track', None)
-            if track:
+            if track and not silent:
                 print(f"Track: {track.get('name')} by {', '.join(artist['name'] for artist in track.get('artists', []))} (ID: {track.get('id', 'Unknown')})")
-        return tracks
+        return tracks.get('items', [])

@@ -27,9 +27,9 @@ def create_playlist(name="", public=False, song_ids=[]):
     response = requests.post(url, params=params)
     data = extract_response_data(response)
     if data and data.get("playlist", None) is not None:
-        print(f"Playlist '{name}' created successfully.")
+        print(f"✅ Playlist '{name}' created successfully with {len(song_ids)} songs.")
     else:
-        print("Failed to create playlist or an error occurred.")
+        print("❌ Failed to create playlist or an error occurred.")
 
 def delete_playlist(playlist_id):
     if not playlist_id:

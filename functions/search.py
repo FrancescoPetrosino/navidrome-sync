@@ -124,3 +124,35 @@ def fetch_all_songs(force_refresh=False):
         print(f"Error saving cache: {e}")
 
     return filtered_songs
+
+def search_songs_from_cache(song_artist_list=[]):
+    if not os.path.exists(SONGS_CACHE_FILE):
+        print(f"Cache file '{SONGS_CACHE_FILE}' does not exist. Please fetch songs first.")
+        return []
+    try:
+        with open(SONGS_CACHE_FILE, "r", encoding="utf-8", newline='') as f:
+            reader = csv.DictReader(f)
+            cached_songs = list(reader)
+    except Exception as e:
+        print(f"Error reading cache: {e}")
+        return []
+
+    matched_songs = []
+    not_found_songs = []
+
+    for song in song_artist_list:
+        title = song.get("title", "")
+        artist = song.get("artist", "")
+        matches = [
+            song for song in cached_songs
+            if title.lower() in song.get('title', '').lower()
+            and artist.lower() in song.get('artist', '').lower()
+        ]
+        if matches:
+            print(f"✅ Found {len(matches)} matches for '{title}' by '{artist}'")
+            matched_songs.extend(matches)
+        else:
+            print(f"❌ No matches found for '{title}' by '{artist}'")
+            not_found_songs.append(song)
+
+    return matched_songs, not_found_songs
