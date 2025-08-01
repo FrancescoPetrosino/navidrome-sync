@@ -14,8 +14,7 @@ def main():
     songs_to_search = []
     spotify_playlists = spotify.get_user_playlists(user_id='21ktslj6lkgx6wswmfwu5cwuq')
 
-    print("\n")
-    print("Choose a playlist to sync from the following Spotify playlists:")
+    print("\nChoose a playlist to sync from the following Spotify playlists:")
     i = 1
     for spotify_playlist in spotify_playlists:
         print(f"{i} - {spotify_playlist.get('name', 'Unknown')}")
@@ -34,12 +33,13 @@ def main():
 
     results, not_found = navidrome.search_songs_from_cache(songs_to_search=songs_to_search)
 
-    print("\n")
+    print("")
     choice_playlist_name = input("Would you enter a different name for the Navidrome playlist? (y/n): ")
     if choice_playlist_name.lower() == 'y':
         choice_playlist_name = input("Enter the new name for the Navidrome playlist: ")
     else:
         choice_playlist_name = spotify_playlists[int(choice_playlist_number) - 1].get('name', 'Unknown')
+    print("\n")
     
     navidrome.create_playlist(
         name=choice_playlist_name,
@@ -47,11 +47,16 @@ def main():
         song_ids=[s['id'] for s in results]
     )
 
-    export_list_to_csv(
-        data=not_found,
-        file_path=f"{NOT_FOUND_REPORT_FILE_PREFIX}-{spotify_playlists[int(choice_playlist_number) - 1].get('name', 'Unknown')}.csv",
-        fieldnames=['artist', 'title']
-    )
+    not_found.sort(key=lambda x: (x['artist'], x['title']))
+    if not_found:
+        print("The following songs were not found in Navidrome and will not be added to the playlist")
+        export_file_path = f"{NOT_FOUND_REPORT_FILE_PREFIX}-{spotify_playlists[int(choice_playlist_number) - 1].get('name', 'Unknown')}.csv"
+        export_list_to_csv(
+            data=not_found,
+            file_path=export_file_path,
+            fieldnames=['artist', 'title']
+        )
+        print(f"You can find the report in the reports folder {export_file_path}")
 
 
 if __name__ == "__main__":
