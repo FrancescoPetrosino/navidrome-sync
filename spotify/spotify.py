@@ -11,7 +11,6 @@ REDIRECT_URI='http://localhost:8080'
 
 class Spotify:
     __sp = None
-    __auth_manager = None
     __scope = [
         "user-library-read",
         "user-top-read",
@@ -49,20 +48,41 @@ class Spotify:
     def get_user_playlists(self, user_id=None, limit=50, silent=True):
         if user_id is None:
             user_id = self.__sp.current_user()['id']
-        playlists = self.__sp.user_playlists(
-            user=user_id,
-            offset=0,
-            limit=limit
-        )
+        current_response_counter = limit
+        offset = 0
+        playlists = []
+        while current_response_counter > 0:
+            result = self.__sp.user_playlists(
+                user=user_id,
+                offset=offset,
+                limit=limit
+            )
+            playlists.extend(result.get('items', []))
+            current_response_counter = len(result.get('items', []))
+            offset += limit
         if not silent:
-            for playlist in playlists.get('items', []):
+            for playlist in playlists:
                 print(f"Playlist: {playlist.get('name')} (ID: {playlist.get('id')}) - Number of songs: {playlist.get('tracks', {}).get('total', 0)} Owner: {playlist.get('owner', {}).get('display_name', 'Unknown')} - Public: {playlist.get('public', False)}")
-        return playlists.get('items', [])
+        return playlists
 
-    def get_playlist_tracks(self, playlist_id, silent=True):
-        tracks = self.__sp.playlist_tracks(playlist_id)
-        for item in tracks.get('items', []):
+    def get_playlist_tracks(self, playlist_id, limit=50, silent=True):
+        if playlist_id is None:
+            print("Playlist ID is required to get tracks.")
+            return []
+        current_response_counter = limit
+        offset = 0
+        tracks = []
+        while current_response_counter > 0:
+            result = self.__sp.playlist_tracks(
+                playlist_id=playlist_id,
+                offset=offset,
+                limit=limit
+            )
+            tracks.extend(result.get('items', []))
+            current_response_counter = len(result.get('items', []))
+            offset += limit
+        for item in tracks:
             track = item.get('track', None)
             if track and not silent:
                 print(f"Track: {track.get('name')} by {', '.join(artist['name'] for artist in track.get('artists', []))} (ID: {track.get('id', 'Unknown')})")
-        return tracks.get('items', [])
+        return tracks

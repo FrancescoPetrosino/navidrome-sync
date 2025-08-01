@@ -5,6 +5,8 @@ from functions.playlist import *
 from spotify.spotify import Spotify
 import csv
 
+NOT_FOUND_REPORT_FILE_PREFIX = './reports/not_found_songs'
+
 def main():
     if ping_server() == -1:
         return
@@ -22,9 +24,11 @@ def main():
 
     results, not_found = search_songs_from_cache(songs_to_search)
 
-    create_playlist(name="My Playlist 1", public=False, song_ids=[s['id'] for s in results])
+    playlist_name = input("Enter the name of the playlist to create: ")
 
-    with open(f"not_found_songs-{spotify_playlist.get('name', 'unknown')}.csv", mode='w', newline='', encoding='utf-8') as csvfile:
+    create_playlist(name=playlist_name, public=False, song_ids=[s['id'] for s in results])
+
+    with open(f"{NOT_FOUND_REPORT_FILE_PREFIX}-{spotify_playlist.get('name', 'unknown')}.csv", mode='w', newline='', encoding='utf-8') as csvfile:
         writer = csv.DictWriter(csvfile, fieldnames=['artist', 'title'])
         writer.writeheader()
         for song in not_found:
