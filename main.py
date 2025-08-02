@@ -1,3 +1,4 @@
+import argparse
 from navidrome.navidrome import Navidrome
 from spotify.spotify import Spotify
 from functions.utils import export_list_to_csv
@@ -5,6 +6,16 @@ from functions.utils import export_list_to_csv
 NOT_FOUND_REPORT_FILE_PREFIX = './reports/not_found_songs'
 
 def main():
+    parser = argparse.ArgumentParser(description='Sinchronize Spotify playlists with Navidrome')
+    parser.add_argument('--clean-cache', action='store_true', help='Cleans and restores the cache by forcing a refresh of all data')
+    
+    args = parser.parse_args()
+    
+    force_refresh = args.clean_cache
+    
+    if force_refresh:
+        print("🗑️ Resetting cache...")
+    
     navidrome = Navidrome()
     if navidrome.ping_server() == -1:
         return
@@ -12,7 +23,7 @@ def main():
     spotify = Spotify()
 
     songs_to_search = []
-    spotify_playlists = spotify.get_user_playlists()
+    spotify_playlists = spotify.get_user_playlists(force_refresh=force_refresh)
 
     print("\nChoose a playlist to sync from the following Spotify playlists:")
     i = 1
@@ -31,7 +42,7 @@ def main():
         for track in spotify_playlist_tracks
     )
 
-    results, not_found = navidrome.search_songs_from_cache(songs_to_search=songs_to_search)
+    results, not_found = navidrome.search_songs_from_cache(songs_to_search=songs_to_search, force_refresh=force_refresh)
 
     print("")
     choice_playlist_name = input("Would you enter a different name for the Navidrome playlist? (y/n): n")

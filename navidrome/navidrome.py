@@ -199,9 +199,12 @@ class Navidrome:
 
         return filtered_songs
 
-    def search_songs_from_cache(self, songs_to_search=[]):
-        if not os.path.exists(SONGS_CACHE_FILE):
-            print(f"Cache file '{SONGS_CACHE_FILE}' does not exist. Please fetch songs first.")
+    def search_songs_from_cache(self, songs_to_search=[], force_refresh=False):
+        if force_refresh or not os.path.exists(SONGS_CACHE_FILE):
+            if force_refresh:
+                print(f"🗑️ Force refresh attivato: ricreazione cache...")
+            else:
+                print(f"Cache file '{SONGS_CACHE_FILE}' does not exist. Please fetch songs first.")
             self.fetch_all_songs(force_refresh=True)
         
         try:
