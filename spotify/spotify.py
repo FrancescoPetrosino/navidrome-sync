@@ -2,8 +2,12 @@ import os
 from dotenv import load_dotenv
 import spotipy
 from spotipy.oauth2 import SpotifyOAuth
+import csv
+from functions.utils import export_list_to_csv
 
 load_dotenv(".env")
+
+PLAYLIST_CACHE_FILE = "./cache/spotify_playlist_cache.csv"
 
 class Spotify:
     __sp = None
@@ -46,9 +50,19 @@ class Spotify:
         print("You are logged in with user id: " + self.__user_id)
         return self.__user_id
 
-    def get_user_playlists(self, user_id=None, limit=50, silent=True):
+    def get_user_playlists(self, user_id=None, limit=50, force_refresh=False, silent=True):
         if user_id is None:
             user_id = self.__user_id
+
+        if not force_refresh and os.path.exists(PLAYLIST_CACHE_FILE):
+            with open(PLAYLIST_CACHE_FILE, 'r', encoding='utf-8', newline='') as f:
+                playlists = csv.DictReader(f)
+                playlists = list(playlists)
+            if not silent:
+                for playlist in playlists:
+                    print(f"Playlist: {playlist.get('name')} (ID: {playlist.get('id')}) - Number of songs: {playlist.get('tracks', {}).get('total', 0)} Owner: {playlist.get('owner', {}).get('display_name', 'Unknown')} - Public: {playlist.get('public', False)}")
+            return playlists
+        
         current_response_counter = limit
         offset = 0
         playlists = []
@@ -64,7 +78,29 @@ class Spotify:
         if not silent:
             for playlist in playlists:
                 print(f"Playlist: {playlist.get('name')} (ID: {playlist.get('id')}) - Number of songs: {playlist.get('tracks', {}).get('total', 0)} Owner: {playlist.get('owner', {}).get('display_name', 'Unknown')} - Public: {playlist.get('public', False)}")
-        return playlists
+        
+        filtered_playlists = [
+            {
+                'id': playlist.get('id', 'Unknown'),
+                'name': playlist.get('name', 'Unknown'),
+                'tracks_number': playlist.get('tracks', {}).get('total', 0),
+                'owner': playlist.get('owner', {}).get('display_name', 'Unknown'),
+                'public': playlist.get('public', False)
+            } for playlist in playlists
+        ]
+
+        try:
+            os.makedirs(os.path.dirname(PLAYLIST_CACHE_FILE), exist_ok=True)
+            export_list_to_csv(
+                data=filtered_playlists,
+                file_path=PLAYLIST_CACHE_FILE,
+                fieldnames=['id', 'name', 'tracks_number', 'owner', 'public']
+            )
+            print(f"Cache updated with {len(filtered_playlists)} playlists in '{PLAYLIST_CACHE_FILE}'")
+        except Exception as e:
+            print(f"Error saving playlist cache: {e}")
+
+        return filtered_playlists
 
     def get_playlist_tracks(self, playlist_id, limit=50, silent=True):
         if playlist_id is None:

@@ -6,6 +6,7 @@ import random
 import string
 import csv
 from urllib.parse import quote_plus
+from functions.utils import export_list_to_csv
 
 load_dotenv(".env")
 
@@ -105,11 +106,11 @@ class Navidrome:
 
         try:
             os.makedirs(os.path.dirname(ARTISTS_CACHE_FILE), exist_ok=True)
-            with open(ARTISTS_CACHE_FILE, "w", encoding="utf-8", newline='') as f:
-                writer = csv.DictWriter(f, fieldnames=["id", "name"])
-                writer.writeheader()
-                writer.writerows(filtered_artists)
-            print(f"Cache updated with {len(filtered_artists)} artists in '{ARTISTS_CACHE_FILE}'")
+            export_list_to_csv(
+                data=filtered_artists,
+                file_path=ARTISTS_CACHE_FILE,
+                fieldnames=["id", "name"]
+            )
         except Exception as e:
             print(f"Error saving artist cache: {e}")
 
@@ -187,11 +188,11 @@ class Navidrome:
             
             fieldnames = sorted(list(all_keys))
             
-            with open(SONGS_CACHE_FILE, "w", encoding="utf-8", newline='') as f:
-                writer = csv.DictWriter(f, fieldnames=fieldnames)
-                writer.writeheader()
-                writer.writerows(filtered_songs)
-
+            export_list_to_csv(
+                data=filtered_songs,
+                file_path=SONGS_CACHE_FILE,
+                fieldnames=fieldnames
+            )
             print(f"Cache updated with {len(filtered_songs)} songs in '{SONGS_CACHE_FILE}'")
         except Exception as e:
             print(f"Error saving cache: {e}")

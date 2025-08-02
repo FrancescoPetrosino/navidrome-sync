@@ -17,7 +17,7 @@ def main():
     print("\nChoose a playlist to sync from the following Spotify playlists:")
     i = 1
     for spotify_playlist in spotify_playlists:
-        print(f"{i} - {spotify_playlist.get('name', 'Unknown')}")
+        print(f"{i} - {spotify_playlist.get('name', 'Unknown')} - Number of songs: {spotify_playlist.get('tracks_number', 0)}")
         i += 1
 
     choice_playlist_number = input("Enter the number of the playlist to sync: ")
@@ -34,7 +34,7 @@ def main():
     results, not_found = navidrome.search_songs_from_cache(songs_to_search=songs_to_search)
 
     print("")
-    choice_playlist_name = input("Would you enter a different name for the Navidrome playlist? (y/n): ")
+    choice_playlist_name = input("Would you enter a different name for the Navidrome playlist? (y/n): n")
     if choice_playlist_name.lower() == 'y':
         choice_playlist_name = input("Enter the new name for the Navidrome playlist: ")
     else:
