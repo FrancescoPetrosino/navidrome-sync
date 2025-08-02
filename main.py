@@ -11,13 +11,8 @@ def main():
     
     spotify = Spotify()
 
-    user_id = input("Enter your Spotify user ID: ")
-    if not user_id:
-        print("User ID cannot be empty. Exiting.")
-        return
-
     songs_to_search = []
-    spotify_playlists = spotify.get_user_playlists(user_id=user_id)
+    spotify_playlists = spotify.get_user_playlists()
 
     print("\nChoose a playlist to sync from the following Spotify playlists:")
     i = 1

@@ -7,7 +7,7 @@ import string
 import csv
 from urllib.parse import quote_plus
 
-load_dotenv("../.env")
+load_dotenv(".env")
 
 ARTISTS_CACHE_FILE = "./cache/navidrome_artists.csv"
 SONGS_CACHE_FILE = "./cache/navidrome_songs.csv"

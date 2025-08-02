@@ -3,11 +3,7 @@ from dotenv import load_dotenv
 import spotipy
 from spotipy.oauth2 import SpotifyOAuth
 
-load_dotenv("../.env")
-
-SPOTIFY_CLIENT_ID=os.getenv("SPOTIFY_CLIENT_ID", "")
-SPOTIFY_CLIENT_SECRET=os.getenv("SPOTIFY_CLIENT_SECRET", "")
-REDIRECT_URI='http://localhost:8080'
+load_dotenv(".env")
 
 class Spotify:
     __sp = None
@@ -30,24 +26,29 @@ class Spotify:
     ]
 
     def __init__(self):
+        self.__client_id = os.getenv("SPOTIFY_CLIENT_ID", "")
+        self.__client_secret = os.getenv("SPOTIFY_CLIENT_SECRET", "")
+        self.__user_id = os.getenv("SPOTIFY_USER_ID", "")
+        self.__redirect_uri = "http://localhost:8080"
         self.get_auth()
         self.get_current_user()
     
     def get_auth(self):
         auth_manager = SpotifyOAuth(
-            client_id=SPOTIFY_CLIENT_ID,
-            client_secret=SPOTIFY_CLIENT_SECRET,
-            redirect_uri=REDIRECT_URI,
+            client_id=self.__client_id,
+            client_secret=self.__client_secret,
+            redirect_uri=self.__redirect_uri,
             scope=self.__scope
         )
         self.__sp = spotipy.Spotify(auth_manager=auth_manager)
 
     def get_current_user(self):
-        print("Connected as: " + self.__sp.current_user().get('display_name', 'Error!'))
+        print("You are logged in with user id: " + self.__user_id)
+        return self.__user_id
 
     def get_user_playlists(self, user_id=None, limit=50, silent=True):
         if user_id is None:
-            user_id = self.__sp.current_user()['id']
+            user_id = self.__user_id
         current_response_counter = limit
         offset = 0
         playlists = []
